@@ -19,6 +19,7 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install
+      - run: uv sync --group dev
       - run: uv run ruff check
       - run: uv run ruff format --check
 
