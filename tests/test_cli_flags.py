@@ -1,6 +1,7 @@
 """Tests for global CLI flags."""
 
 import pytest
+import typer
 from typer.testing import CliRunner
 
 from tempeh.cli.main import cli
@@ -35,5 +36,6 @@ def test_json_shorthand():
 def test_help_shows_flags():
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0
+    output = typer.unstyle(result.output)
     for flag in ["--verbose", "--quiet", "--color", "--format", "--config", "--version"]:
-        assert flag in result.output
+        assert flag in output
