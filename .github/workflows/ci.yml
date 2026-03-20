@@ -31,5 +31,5 @@ jobs:
         with:
           enable-cache: true
       - run: uv python install
-      - run: uv sync
+      - run: uv sync --group test
       - run: uv run pytest -v
