@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tempeh"
+version = "0.0.1"
+description = "A CLI and TUI Python session supervisor with batteries included."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "typer>=0.12",
+]
+
+[project.scripts]
+tempeh = "tempeh.cli.main:cli"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.8",
+]
+test = [
+    "pytest>=9.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120

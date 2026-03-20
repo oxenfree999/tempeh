@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+.venv/
+.ruff_cache/
+.pytest_cache/
+
+# AI
+.lsp.json
