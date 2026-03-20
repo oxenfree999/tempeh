@@ -16,6 +16,14 @@ dependencies = [
 [project.scripts]
 tempeh = "tempeh.cli.main:cli"
 
+[dependency-groups]
+test = [
+    "pytest>=9.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
 [tool.ruff]
 target-version = "py312"
 line-length = 120
