@@ -23,10 +23,14 @@ dev = [
 ]
 test = [
     "pytest>=9.0",
+    "inline-snapshot>=0.24",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[tool.inline-snapshot]
+format-command = "ruff format --stdin-filename {filename}"
 
 [tool.ruff]
 target-version = "py312"
