@@ -5,6 +5,7 @@ from typing import Annotated
 
 import typer
 
+from tempeh.cli.logging import configure_logging, resolve_log_level
 from tempeh.cli.state import ColorMode, GlobalState, OutputFormat, resolve_color
 from tempeh.version import VERSION
 
@@ -42,14 +43,19 @@ def _main(
     if json_flag:
         output_format = OutputFormat.json
 
+    log_level = resolve_log_level(verbose, quiet)
+
     ctx.obj = GlobalState(
         verbose=verbose,
         quiet=quiet,
         color=color,
         color_enabled=resolve_color(color),
         output_format=output_format,
+        log_level=log_level,
         config_path=config,
     )
+
+    configure_logging(log_level, output_format)
 
     if ctx.invoked_subcommand is None:
         print(ctx.get_help())
