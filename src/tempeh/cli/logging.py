@@ -1,0 +1,43 @@
+"""Structlog-based internal diagnostics for Tempeh."""
+
+import logging
+import os
+import sys
+
+import structlog
+
+from tempeh.cli.state import OutputFormat
+
+_LEVEL_NAMES: dict[str, int] = {
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+}
+
+
+def resolve_log_level(verbose: int, quiet: bool) -> int:
+    """Return the effective log level.
+
+    Precedence: CLI flags (-v/-q) → TEMPEH_LOG env var → WARNING default.
+    """
+    if quiet:
+        return logging.ERROR
+    if verbose >= 2:
+        return logging.DEBUG
+    if verbose == 1:
+        return logging.INFO
+
+    return _LEVEL_NAMES.get(os.environ.get("TEMPEH_LOG", "").strip().lower(), logging.WARNING)
+
+
+def configure_logging(level: int, output_format: OutputFormat) -> None:
+    """Configure structlog for Tempeh's diagnostic output."""
+    renderer = (
+        structlog.processors.JSONRenderer() if output_format is OutputFormat.json else structlog.dev.ConsoleRenderer()
+    )
+    structlog.configure(
+        processors=[structlog.processors.add_log_level, renderer],
+        wrapper_class=structlog.make_filtering_bound_logger(level),
+        logger_factory=structlog.PrintLoggerFactory(file=sys.stderr),
+    )

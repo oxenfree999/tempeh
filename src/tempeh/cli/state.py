@@ -34,4 +34,5 @@ class GlobalState:
     color: ColorMode
     color_enabled: bool
     output_format: OutputFormat
+    log_level: int
     config_path: Path | None
