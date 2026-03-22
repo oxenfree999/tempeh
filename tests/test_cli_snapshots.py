@@ -52,6 +52,7 @@ def test_main_help(monkeypatch):
 │                                                    exit.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ doctor   Check Tempeh environment and report status.                         │
 │ version  Show Tempeh version.                                                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
@@ -67,6 +68,23 @@ def test_version_help(monkeypatch):
  Usage: tempeh version [OPTIONS]                                                \n\
                                                                                 \n\
  Show Tempeh version.                                                           \n\
+                                                                                \n\
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --help          Show this message and exit.                                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+""")
+
+
+def test_doctor_help(monkeypatch):
+    monkeypatch.setenv("COLUMNS", "80")
+    result = runner.invoke(cli, ["doctor", "--help"])
+    assert result.exit_code == 0
+    assert typer.unstyle(result.output) == snapshot("""\
+                                                                                \n\
+ Usage: tempeh doctor [OPTIONS]                                                 \n\
+                                                                                \n\
+ Check Tempeh environment and report status.                                    \n\
                                                                                 \n\
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help          Show this message and exit.                                  │
