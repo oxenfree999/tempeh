@@ -1,10 +1,12 @@
 """Tempeh CLI entry point."""
 
+import json
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
+from tempeh.cli.doctor import format_text, get_system_info
 from tempeh.cli.logging import configure_logging, resolve_log_level
 from tempeh.cli.state import ColorMode, GlobalState, OutputFormat, resolve_color
 from tempeh.version import VERSION
@@ -60,6 +62,17 @@ def _main(
     if ctx.invoked_subcommand is None:
         print(ctx.get_help())
         raise typer.Exit()
+
+
+@cli.command()
+def doctor(ctx: typer.Context) -> None:
+    """Check Tempeh environment and report status."""
+    info = get_system_info()
+    state: GlobalState = ctx.obj
+    if state.output_format == OutputFormat.json:
+        print(json.dumps(info, indent=2))
+    else:
+        print(format_text(info))
 
 
 @cli.command()
