@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 from typer.testing import CliRunner
 
-from tempeh.cli.doctor import _get_tool_info, _get_venv, get_system_info
+from tempeh.cli.doctor import _get_tool_info, _get_venv, format_text, get_system_info
 from tempeh.cli.main import cli
 
 runner = CliRunner()
@@ -60,6 +60,14 @@ def test_get_venv_not_active(monkeypatch):
 def test_get_system_info_keys():
     info = get_system_info()
     assert set(info.keys()) == {"platform", "directory", "venv", "interpreter", "python", "tempeh", "uv", "ruff", "ty"}
+
+
+def test_format_text_shows_unavailable_tools():
+    info = get_system_info()
+    info["ruff"] = {"available": False, "version": None, "path": None}
+    output = format_text(info)
+    assert "ruff" in output
+    assert "not found" in output
 
 
 def test_doctor_exits_zero():

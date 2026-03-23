@@ -64,5 +64,7 @@ def format_text(info: dict[str, Any]) -> str:
         tool = info[name]
         if tool["available"]:
             lines.append(f"{name:<{LABEL_WIDTH}} {tool['version']}")
+        else:
+            lines.append(f"{name:<{LABEL_WIDTH}} not found")
 
     return "\n".join(lines)
