@@ -4,12 +4,11 @@ import json
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from types import SimpleNamespace
 
 from typer.testing import CliRunner
 
-from tempeh.cli.doctor import _get_tool_info, _get_venv, _shorten_path, get_system_info
+from tempeh.cli.doctor import _get_tool_info, _get_venv, get_system_info
 from tempeh.cli.main import cli
 
 runner = CliRunner()
@@ -24,14 +23,6 @@ def test_get_tool_info_found(monkeypatch):
 def test_get_tool_info_not_found(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: None)
     assert _get_tool_info("fake") == {"available": False, "version": None, "path": None}
-
-
-def test_shorten_path_inside_home():
-    assert _shorten_path(str(Path.home() / "project")) == "~/project"
-
-
-def test_shorten_path_outside_home():
-    assert _shorten_path("/usr/local/bin/python") == "/usr/local/bin/python"
 
 
 def test_get_venv_active(monkeypatch):

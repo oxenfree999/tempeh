@@ -12,12 +12,6 @@ from tempeh.version import VERSION
 LABEL_WIDTH = 14
 
 
-def _shorten_path(path: str) -> str:
-    """Replace home directory with ~ for shorter display."""
-    home = str(Path.home())
-    return path.replace(home, "~", 1) if path.startswith(home) else path
-
-
 def _get_tool_info(name: str) -> dict[str, Any]:
     """Detect a CLI tool's availability and version."""
     path = shutil.which(name)
@@ -54,11 +48,11 @@ def format_text(info: dict[str, Any]) -> str:
 
     p = info["platform"]
     lines.append(f"{'Platform':<{LABEL_WIDTH}} {p['system']} {p['release']} ({p['machine']})")
-    lines.append(f"{'Directory':<{LABEL_WIDTH}} {_shorten_path(info['directory'])}")
+    lines.append(f"{'Directory':<{LABEL_WIDTH}} {info['directory']}")
 
     venv = info["venv"]
-    lines.append(f"{'Venv':<{LABEL_WIDTH}} {_shorten_path(venv) if venv else 'not active'}")
-    lines.append(f"{'Interpreter':<{LABEL_WIDTH}} {_shorten_path(info['interpreter'])}")
+    lines.append(f"{'Venv':<{LABEL_WIDTH}} {venv if venv else 'not active'}")
+    lines.append(f"{'Interpreter':<{LABEL_WIDTH}} {info['interpreter']}")
 
     lines.append(f"{'Tempeh':<{LABEL_WIDTH}} {info['tempeh']['version']}")
     lines.append(f"{'Python':<{LABEL_WIDTH}} {info['python']['version']}")
