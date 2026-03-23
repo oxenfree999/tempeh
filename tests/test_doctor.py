@@ -20,6 +20,26 @@ def test_get_tool_info_found(monkeypatch):
     assert _get_tool_info("fake") == {"available": True, "version": "1.2.3", "path": "/usr/bin/fake"}
 
 
+def test_get_tool_info_timeout(monkeypatch):
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/fake")
+
+    def run_timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="fake", timeout=1)
+
+    monkeypatch.setattr(subprocess, "run", run_timeout)
+    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake"}
+
+
+def test_get_tool_info_oserror(monkeypatch):
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/fake")
+
+    def run_oserror(*args, **kwargs):
+        raise OSError("exec failed")
+
+    monkeypatch.setattr(subprocess, "run", run_oserror)
+    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake"}
+
+
 def test_get_tool_info_not_found(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: None)
     assert _get_tool_info("fake") == {"available": False, "version": None, "path": None}

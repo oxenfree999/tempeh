@@ -17,7 +17,10 @@ def _get_tool_info(name: str) -> dict[str, Any]:
     path = shutil.which(name)
     if path is None:
         return {"available": False, "version": None, "path": None}
-    proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=5)
+    try:
+        proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=3)
+    except (subprocess.TimeoutExpired, OSError):
+        return {"available": True, "version": None, "path": path}
     version = proc.stdout.strip().removeprefix(f"{name} ").split()[0] if proc.returncode == 0 else None
     return {"available": True, "version": version, "path": path}
 
