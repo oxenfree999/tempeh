@@ -4,12 +4,11 @@ import json
 import shutil
 import subprocess
 import sys
-from pathlib import Path
 from types import SimpleNamespace
 
 from typer.testing import CliRunner
 
-from tempeh.cli.doctor import _get_tool_info, _get_venv, _shorten_path, get_system_info
+from tempeh.cli.doctor import _get_tool_info, _get_venv, format_text, get_system_info
 from tempeh.cli.main import cli
 
 runner = CliRunner()
@@ -21,17 +20,29 @@ def test_get_tool_info_found(monkeypatch):
     assert _get_tool_info("fake") == {"available": True, "version": "1.2.3", "path": "/usr/bin/fake"}
 
 
+def test_get_tool_info_timeout(monkeypatch):
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/fake")
+
+    def run_timeout(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd="fake", timeout=1)
+
+    monkeypatch.setattr(subprocess, "run", run_timeout)
+    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake"}
+
+
+def test_get_tool_info_oserror(monkeypatch):
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/fake")
+
+    def run_oserror(*args, **kwargs):
+        raise OSError("exec failed")
+
+    monkeypatch.setattr(subprocess, "run", run_oserror)
+    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake"}
+
+
 def test_get_tool_info_not_found(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: None)
     assert _get_tool_info("fake") == {"available": False, "version": None, "path": None}
-
-
-def test_shorten_path_inside_home():
-    assert _shorten_path(str(Path.home() / "project")) == "~/project"
-
-
-def test_shorten_path_outside_home():
-    assert _shorten_path("/usr/local/bin/python") == "/usr/local/bin/python"
 
 
 def test_get_venv_active(monkeypatch):
@@ -51,9 +62,19 @@ def test_get_system_info_keys():
     assert set(info.keys()) == {"platform", "directory", "venv", "interpreter", "python", "tempeh", "uv", "ruff", "ty"}
 
 
-def test_doctor_exits_zero():
+def test_format_text_shows_unavailable_tools():
+    info = get_system_info()
+    info["ruff"] = {"available": False, "version": None, "path": None}
+    output = format_text(info)
+    assert "ruff" in output
+    assert "not found" in output
+
+
+def test_doctor_text_contains_expected_labels():
     result = runner.invoke(cli, ["doctor"])
     assert result.exit_code == 0
+    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python", "uv", "ruff", "ty"):
+        assert label in result.output
 
 
 def test_doctor_json_is_valid():
