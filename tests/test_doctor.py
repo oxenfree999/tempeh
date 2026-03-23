@@ -70,9 +70,11 @@ def test_format_text_shows_unavailable_tools():
     assert "not found" in output
 
 
-def test_doctor_exits_zero():
+def test_doctor_text_contains_expected_labels():
     result = runner.invoke(cli, ["doctor"])
     assert result.exit_code == 0
+    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python", "uv", "ruff", "ty"):
+        assert label in result.output
 
 
 def test_doctor_json_is_valid():
