@@ -12,12 +12,29 @@ from tempeh.version import VERSION
 LABEL_WIDTH = 14
 
 KNOWN_TOOLS = (
-    "uv", "pip", "poetry", "pdm",               # packaging
-    "ruff", "flake8", "pylint",                 # linting
-    "black", "isort",                           # formatting
-    "ty", "mypy", "pyright",                    # type checking
-    "debugpy",                                  # debugging
-    "austin", "py-spy", "memray", "scalene",    # profiling
+    # packaging
+    "uv",
+    "pip",
+    "poetry",
+    "pdm",
+    # linting
+    "ruff",
+    "flake8",
+    "pylint",
+    # formatting
+    "black",
+    "isort",
+    # type checking
+    "ty",
+    "mypy",
+    "pyright",
+    # debugging
+    "debugpy",
+    # profiling
+    "austin",
+    "py-spy",
+    "memray",
+    "scalene",
 )
 
 PREFERRED_TOOLS = ("uv", "ruff", "ty", "debugpy")

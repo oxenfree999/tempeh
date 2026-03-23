@@ -27,7 +27,12 @@ def test_get_tool_info_timeout(monkeypatch):
         raise subprocess.TimeoutExpired(cmd="fake", timeout=1)
 
     monkeypatch.setattr(subprocess, "run", run_timeout)
-    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake", "error": "Command 'fake' timed out after 1 seconds"}
+    assert _get_tool_info("fake") == {
+        "available": True,
+        "version": None,
+        "path": "/usr/bin/fake",
+        "error": "Command 'fake' timed out after 1 seconds",
+    }
 
 
 def test_get_tool_info_oserror(monkeypatch):
@@ -37,7 +42,12 @@ def test_get_tool_info_oserror(monkeypatch):
         raise OSError("exec failed")
 
     monkeypatch.setattr(subprocess, "run", run_oserror)
-    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake", "error": "exec failed"}
+    assert _get_tool_info("fake") == {
+        "available": True,
+        "version": None,
+        "path": "/usr/bin/fake",
+        "error": "exec failed",
+    }
 
 
 def test_get_tool_info_not_found(monkeypatch):
