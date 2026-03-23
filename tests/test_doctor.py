@@ -8,7 +8,7 @@ from types import SimpleNamespace
 
 from typer.testing import CliRunner
 
-from tempeh.cli.doctor import _get_tool_info, _get_venv, format_text, get_system_info
+from tempeh.cli.doctor import PREFERRED_TOOLS, _get_tool_info, _get_venv, format_text, get_system_info
 from tempeh.cli.main import cli
 
 runner = CliRunner()
@@ -59,12 +59,12 @@ def test_get_venv_not_active(monkeypatch):
 
 def test_get_system_info_keys():
     info = get_system_info()
-    assert set(info.keys()) == {"platform", "directory", "venv", "interpreter", "python", "tempeh", "uv", "ruff", "ty"}
+    assert set(info.keys()) == {"platform", "directory", "venv", "interpreter", "python", "tempeh", "tools"}
 
 
 def test_format_text_shows_unavailable_tools():
     info = get_system_info()
-    info["ruff"] = {"available": False, "version": None, "path": None}
+    info["tools"]["ruff"] = {"available": False, "version": None, "path": None}
     output = format_text(info)
     assert "ruff" in output
     assert "not found" in output
@@ -73,7 +73,7 @@ def test_format_text_shows_unavailable_tools():
 def test_doctor_text_contains_expected_labels():
     result = runner.invoke(cli, ["doctor"])
     assert result.exit_code == 0
-    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python", "uv", "ruff", "ty"):
+    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python") + PREFERRED_TOOLS:
         assert label in result.output
 
 
