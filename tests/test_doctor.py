@@ -17,7 +17,7 @@ runner = CliRunner()
 def test_get_tool_info_found(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/fake")
     monkeypatch.setattr(subprocess, "run", lambda *a, **kw: SimpleNamespace(returncode=0, stdout="fake 1.2.3\n"))
-    assert _get_tool_info("fake") == {"available": True, "version": "1.2.3", "path": "/usr/bin/fake"}
+    assert _get_tool_info("fake") == {"available": True, "version": "1.2.3", "path": "/usr/bin/fake", "error": None}
 
 
 def test_get_tool_info_timeout(monkeypatch):
@@ -27,7 +27,7 @@ def test_get_tool_info_timeout(monkeypatch):
         raise subprocess.TimeoutExpired(cmd="fake", timeout=1)
 
     monkeypatch.setattr(subprocess, "run", run_timeout)
-    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake"}
+    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake", "error": "Command 'fake' timed out after 1 seconds"}
 
 
 def test_get_tool_info_oserror(monkeypatch):
@@ -37,12 +37,12 @@ def test_get_tool_info_oserror(monkeypatch):
         raise OSError("exec failed")
 
     monkeypatch.setattr(subprocess, "run", run_oserror)
-    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake"}
+    assert _get_tool_info("fake") == {"available": True, "version": None, "path": "/usr/bin/fake", "error": "exec failed"}
 
 
 def test_get_tool_info_not_found(monkeypatch):
     monkeypatch.setattr(shutil, "which", lambda name: None)
-    assert _get_tool_info("fake") == {"available": False, "version": None, "path": None}
+    assert _get_tool_info("fake") == {"available": False, "version": None, "path": None, "error": None}
 
 
 def test_get_venv_active(monkeypatch):
@@ -64,7 +64,7 @@ def test_get_system_info_keys():
 
 def test_format_text_shows_unavailable_tools():
     info = get_system_info()
-    info["tools"]["ruff"] = {"available": False, "version": None, "path": None}
+    info["tools"]["ruff"] = {"available": False, "version": None, "path": None, "error": None}
     output = format_text(info)
     assert "ruff" in output
     assert "not found" in output

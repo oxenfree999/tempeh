@@ -27,13 +27,13 @@ def _get_tool_info(name: str) -> dict[str, Any]:
     """Detect a CLI tool's availability and version."""
     path = shutil.which(name)
     if path is None:
-        return {"available": False, "version": None, "path": None}
+        return {"available": False, "version": None, "path": None, "error": None}
     try:
         proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=3)
-    except (subprocess.TimeoutExpired, OSError):
-        return {"available": True, "version": None, "path": path}
+    except Exception as e:
+        return {"available": True, "version": None, "path": path, "error": str(e)}
     version = proc.stdout.strip().removeprefix(f"{name} ").split()[0] if proc.returncode == 0 else None
-    return {"available": True, "version": version, "path": path}
+    return {"available": True, "version": version, "path": path, "error": None}
 
 
 def _get_venv() -> str | None:
@@ -74,7 +74,10 @@ def format_text(info: dict[str, Any]) -> str:
     for name in KNOWN_TOOLS:
         tool = info["tools"][name]
         if tool["available"]:
-            lines.append(f"{name:<{LABEL_WIDTH}} {tool['version']}")
+            if tool["error"]:
+                lines.append(f"{name:<{LABEL_WIDTH}} {tool['error']}")
+            else:
+                lines.append(f"{name:<{LABEL_WIDTH}} {tool['version']}")
         elif name in PREFERRED_TOOLS:
             lines.append(f"{name:<{LABEL_WIDTH}} not found")
 
