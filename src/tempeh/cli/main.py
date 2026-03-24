@@ -8,7 +8,7 @@ import typer
 
 from tempeh.cli.doctor import format_text, get_system_info
 from tempeh.cli.logging import configure_logging, resolve_log_level
-from tempeh.cli.state import ColorMode, GlobalState, OutputFormat, resolve_color
+from tempeh.cli.state import ColorMode, ExitCode, GlobalState, OutputFormat, resolve_color
 from tempeh.version import VERSION
 
 cli = typer.Typer(
@@ -22,7 +22,7 @@ cli = typer.Typer(
 def _version_callback(value: bool) -> None:
     if value:
         print(f"tempeh {VERSION}")
-        raise typer.Exit()
+        raise typer.Exit(ExitCode.SUCCESS)
 
 
 @cli.callback()
@@ -62,7 +62,7 @@ def _main(
 
     if ctx.invoked_subcommand is None:
         print(ctx.get_help())
-        raise typer.Exit()
+        raise typer.Exit(ExitCode.SUCCESS)
 
 
 @cli.command()
