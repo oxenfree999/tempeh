@@ -48,7 +48,7 @@ def test_main_help(monkeypatch):
 │                                                    current shell, to copy it │
 │                                                    or customize the          │
 │                                                    installation.             │
-│ --help                                             Show this message and     │
+│ --help                -h                           Show this message and     │
 │                                                    exit.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
@@ -70,7 +70,7 @@ def test_version_help(monkeypatch):
  Show Tempeh version.                                                           \n\
                                                                                 \n\
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --help          Show this message and exit.                                  │
+│ --help  -h        Show this message and exit.                                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)
@@ -87,7 +87,7 @@ def test_doctor_help(monkeypatch):
  Check Tempeh environment and report status.                                    \n\
                                                                                 \n\
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
-│ --help          Show this message and exit.                                  │
+│ --help  -h        Show this message and exit.                                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)

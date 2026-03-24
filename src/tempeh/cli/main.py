@@ -15,6 +15,7 @@ cli = typer.Typer(
     name="tempeh",
     help="A CLI and TUI Python session supervisor with batteries included.",
     invoke_without_command=True,
+    context_settings={"help_option_names": ["--help", "-h"]},
 )
 
 
