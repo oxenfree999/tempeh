@@ -83,7 +83,7 @@ def test_format_text_shows_unavailable_tools():
 def test_doctor_text_contains_expected_labels():
     result = runner.invoke(cli, ["doctor"])
     assert result.exit_code == 0
-    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python") + PREFERRED_TOOLS:
+    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python", *PREFERRED_TOOLS):
         assert label in result.output
 
 

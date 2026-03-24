@@ -3,23 +3,29 @@
 import os
 import sys
 from dataclasses import dataclass
-from enum import Enum, IntEnum
+from enum import IntEnum, StrEnum
 from pathlib import Path
 
 
 class ExitCode(IntEnum):
+    """Process exit codes."""
+
     SUCCESS = 0
     ERROR = 1
     USAGE = 2
 
 
-class ColorMode(str, Enum):
+class ColorMode(StrEnum):
+    """Terminal color output mode."""
+
     auto = "auto"
     always = "always"
     never = "never"
 
 
-class OutputFormat(str, Enum):
+class OutputFormat(StrEnum):
+    """Output serialization format."""
+
     text = "text"
     json = "json"
 
@@ -35,6 +41,8 @@ def resolve_color(mode: ColorMode) -> bool:
 
 @dataclass(frozen=True, slots=True)
 class GlobalState:
+    """Immutable state resolved from global CLI flags."""
+
     verbose: int
     quiet: bool
     color: ColorMode

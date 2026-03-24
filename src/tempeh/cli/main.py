@@ -36,7 +36,7 @@ def _main(
     ] = OutputFormat.text,
     json_flag: Annotated[bool, typer.Option("--json", help="Shorthand for --format json.")] = False,
     config: Annotated[Path | None, typer.Option("--config", help="Override config file location.")] = None,
-    version: Annotated[
+    version: Annotated[  # noqa: ARG001 — Typer requires the param; work happens in callback
         bool | None, typer.Option("--version", "-V", callback=_version_callback, is_eager=True, help="Show version.")
     ] = None,
 ) -> None:
