@@ -10,7 +10,7 @@ from tempeh.cli.state import OutputFormat
 
 
 @pytest.mark.parametrize(
-    "verbose, quiet, env, expected",
+    ("verbose", "quiet", "env", "expected"),
     [
         (0, False, {}, logging.WARNING),
         (1, False, {}, logging.INFO),

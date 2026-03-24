@@ -16,6 +16,10 @@ _LEVEL_NAMES: dict[str, int] = {
 }
 
 
+_VERBOSE_INFO = 1
+_VERBOSE_DEBUG = 2
+
+
 def resolve_log_level(verbose: int, quiet: bool) -> int:
     """Return the effective log level.
 
@@ -23,9 +27,9 @@ def resolve_log_level(verbose: int, quiet: bool) -> int:
     """
     if quiet:
         return logging.ERROR
-    if verbose >= 2:
+    if verbose >= _VERBOSE_DEBUG:
         return logging.DEBUG
-    if verbose == 1:
+    if verbose == _VERBOSE_INFO:
         return logging.INFO
 
     return _LEVEL_NAMES.get(os.environ.get("TEMPEH_LOG", "").strip().lower(), logging.WARNING)

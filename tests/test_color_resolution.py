@@ -6,7 +6,7 @@ from tempeh.cli.state import ColorMode, resolve_color
 
 
 @pytest.mark.parametrize(
-    "mode, tty, env, expected",
+    ("mode", "tty", "env", "expected"),
     [
         (ColorMode.always, False, {"NO_COLOR": "1"}, True),
         (ColorMode.never, True, {}, False),

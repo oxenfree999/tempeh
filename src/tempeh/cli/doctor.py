@@ -46,8 +46,8 @@ def _get_tool_info(name: str) -> dict[str, Any]:
     if path is None:
         return {"available": False, "version": None, "path": None, "error": None}
     try:
-        proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=3)
-    except Exception as e:
+        proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=3, check=False)  # noqa: S603 — path comes from shutil.which
+    except Exception as e:  # noqa: BLE001 — version check should never crash doctor
         return {"available": True, "version": None, "path": path, "error": str(e)}
     version = proc.stdout.strip().removeprefix(f"{name} ").split()[0] if proc.returncode == 0 else None
     return {"available": True, "version": version, "path": path, "error": None}
@@ -81,7 +81,7 @@ def format_text(info: dict[str, Any]) -> str:
     lines.append(f"{'Directory':<{LABEL_WIDTH}} {info['directory']}")
 
     venv = info["venv"]
-    lines.append(f"{'Venv':<{LABEL_WIDTH}} {venv if venv else 'not active'}")
+    lines.append(f"{'Venv':<{LABEL_WIDTH}} {venv or 'not active'}")
     lines.append(f"{'Interpreter':<{LABEL_WIDTH}} {info['interpreter']}")
 
     lines.append(f"{'Tempeh':<{LABEL_WIDTH}} {info['tempeh']['version']}")
