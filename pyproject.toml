@@ -20,6 +20,7 @@ tempeh = "tempeh.cli.main:cli"
 [dependency-groups]
 dev = [
     "ruff>=0.8",
+    "ty>=0.0",
 ]
 test = [
     "pytest>=9.0",
