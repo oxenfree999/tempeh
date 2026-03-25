@@ -28,13 +28,15 @@ from tempeh.cli.state import OutputFormat
         (0, False, {"TEMPEH_LOG": ""}, logging.WARNING),
     ],
 )
-def test_resolve_log_level(verbose, quiet, env, expected, monkeypatch):
+def test_resolve_log_level(
+    verbose: int, quiet: bool, env: dict[str, str], expected: int, monkeypatch: pytest.MonkeyPatch
+) -> None:
     for key, value in env.items():
         monkeypatch.setenv(key, value)
     assert resolve_log_level(verbose, quiet) == expected
 
 
-def test_output_to_stderr(capsys):
+def test_output_to_stderr(capsys: pytest.CaptureFixture[str]) -> None:
     configure_logging(logging.DEBUG, OutputFormat.text)
     structlog.get_logger().info("hello")
     captured = capsys.readouterr()
@@ -42,14 +44,14 @@ def test_output_to_stderr(capsys):
     assert "hello" in captured.err
 
 
-def test_json_output():
+def test_json_output() -> None:
     configure_logging(logging.DEBUG, OutputFormat.json)
     with structlog.testing.capture_logs() as logs:
         structlog.get_logger().info("hello")
     assert logs == [{"event": "hello", "log_level": "info"}]
 
 
-def test_level_filtering():
+def test_level_filtering() -> None:
     configure_logging(logging.WARNING, OutputFormat.text)
     with structlog.testing.capture_logs() as logs:
         structlog.get_logger().info("should not appear")
@@ -58,7 +60,7 @@ def test_level_filtering():
     assert logs[0]["event"] == "should appear"
 
 
-def test_json_output_end_to_end(capsys):
+def test_json_output_end_to_end(capsys: pytest.CaptureFixture[str]) -> None:
     configure_logging(logging.DEBUG, OutputFormat.json)
     structlog.get_logger().info("hello")
     captured = capsys.readouterr()

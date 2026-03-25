@@ -19,7 +19,9 @@ from tempeh.cli.state import ColorMode, resolve_color
         (ColorMode.auto, True, {"TERM": "DUMB"}, False),
     ],
 )
-def test_resolve_color(mode, tty, env, expected, monkeypatch):
+def test_resolve_color(
+    mode: ColorMode, tty: bool, env: dict[str, str], expected: bool, monkeypatch: pytest.MonkeyPatch
+) -> None:
     monkeypatch.setattr("sys.stdout", type("FakeStdout", (), {"isatty": lambda self: tty})())
     for key, value in env.items():
         monkeypatch.setenv(key, value)

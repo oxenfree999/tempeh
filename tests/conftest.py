@@ -1,9 +1,11 @@
+from collections.abc import Iterator
+
 import pytest
 import structlog
 
 
 @pytest.fixture(autouse=True)
-def clean_env(monkeypatch):
+def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("NO_COLOR", raising=False)
     monkeypatch.delenv("TERM", raising=False)
     monkeypatch.delenv("TEMPEH_LOG", raising=False)
@@ -14,6 +16,6 @@ def clean_env(monkeypatch):
 
 
 @pytest.fixture(autouse=True)
-def _reset_structlog():
+def _reset_structlog() -> Iterator[None]:
     yield
     structlog.reset_defaults()
