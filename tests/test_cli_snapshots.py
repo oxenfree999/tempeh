@@ -8,6 +8,7 @@ string.  When the CLI surface changes intentionally, run:
 to accept the new output.
 """
 
+import pytest
 import typer
 from inline_snapshot import snapshot
 from typer.testing import CliRunner
@@ -25,7 +26,7 @@ def normalize_box(text: str) -> str:
     return text.translate(_BOX_NORMALIZE)
 
 
-def test_main_help(monkeypatch):
+def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COLUMNS", "80")
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0
@@ -67,7 +68,7 @@ def test_main_help(monkeypatch):
 """)
 
 
-def test_version_help(monkeypatch):
+def test_version_help(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COLUMNS", "80")
     result = runner.invoke(cli, ["version", "--help"])
     assert result.exit_code == 0
@@ -84,7 +85,7 @@ def test_version_help(monkeypatch):
 """)
 
 
-def test_doctor_help(monkeypatch):
+def test_doctor_help(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COLUMNS", "80")
     result = runner.invoke(cli, ["doctor", "--help"])
     assert result.exit_code == 0
@@ -101,7 +102,7 @@ def test_doctor_help(monkeypatch):
 """)
 
 
-def test_version_output():
+def test_version_output() -> None:
     result = runner.invoke(cli, ["version"])
     assert result.exit_code == 0
     assert result.output == snapshot("tempeh 0.0.1\n")
