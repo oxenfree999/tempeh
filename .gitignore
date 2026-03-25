@@ -8,3 +8,5 @@ dist/
 
 # AI
 .lsp.json
+CLAUDE.md
+AGENTS.md

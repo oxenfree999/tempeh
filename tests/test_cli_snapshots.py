@@ -17,26 +17,18 @@ from tempeh.cli.main import cli
 
 runner = CliRunner()
 
-# Rich uses rounded corners on Unix/macOS but square corners on legacy
-# Windows.  Normalize to square so snapshots are platform-agnostic.
-_BOX_NORMALIZE = str.maketrans("╭╮╰╯", "┌┐└┘")
-
-
-def normalize_box(text: str) -> str:
-    return text.translate(_BOX_NORMALIZE)
-
 
 def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COLUMNS", "80")
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0
-    assert normalize_box(typer.unstyle(result.output)) == snapshot("""\
+    assert typer.unstyle(result.output) == snapshot("""\
                                                                                 \n\
  Usage: tempeh [OPTIONS] COMMAND [ARGS]...                                      \n\
                                                                                 \n\
  A CLI and TUI Python session supervisor with batteries included.               \n\
                                                                                 \n\
-┌─ Options ────────────────────────────────────────────────────────────────────┐
+╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --verbose             -v      INTEGER              Increase output detail    │
 │                                                    (-v, -vv).                │
 │                                                    [default: 0]              │
@@ -59,11 +51,11 @@ def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
 │                                                    installation.             │
 │ --help                -h                           Show this message and     │
 │                                                    exit.                     │
-└──────────────────────────────────────────────────────────────────────────────┘
-┌─ Commands ───────────────────────────────────────────────────────────────────┐
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ doctor   Check Tempeh environment and report status.                         │
 │ version  Show Tempeh version.                                                │
-└──────────────────────────────────────────────────────────────────────────────┘
+╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)
 
@@ -72,15 +64,15 @@ def test_version_help(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COLUMNS", "80")
     result = runner.invoke(cli, ["version", "--help"])
     assert result.exit_code == 0
-    assert normalize_box(typer.unstyle(result.output)) == snapshot("""\
+    assert typer.unstyle(result.output) == snapshot("""\
                                                                                 \n\
  Usage: tempeh version [OPTIONS]                                                \n\
                                                                                 \n\
  Show Tempeh version.                                                           \n\
                                                                                 \n\
-┌─ Options ────────────────────────────────────────────────────────────────────┐
+╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help  -h        Show this message and exit.                                │
-└──────────────────────────────────────────────────────────────────────────────┘
+╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)
 
@@ -89,15 +81,15 @@ def test_doctor_help(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("COLUMNS", "80")
     result = runner.invoke(cli, ["doctor", "--help"])
     assert result.exit_code == 0
-    assert normalize_box(typer.unstyle(result.output)) == snapshot("""\
+    assert typer.unstyle(result.output) == snapshot("""\
                                                                                 \n\
  Usage: tempeh doctor [OPTIONS]                                                 \n\
                                                                                 \n\
  Check Tempeh environment and report status.                                    \n\
                                                                                 \n\
-┌─ Options ────────────────────────────────────────────────────────────────────┐
+╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help  -h        Show this message and exit.                                │
-└──────────────────────────────────────────────────────────────────────────────┘
+╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)
 
