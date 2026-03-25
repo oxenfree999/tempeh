@@ -33,12 +33,6 @@ def test_resolve_log_level(verbose, quiet, env, expected, monkeypatch):
     assert resolve_log_level(verbose, quiet) == expected
 
 
-@pytest.fixture(autouse=True)
-def _reset_structlog():
-    yield
-    structlog.reset_defaults()
-
-
 def test_output_to_stderr(capsys):
     configure_logging(logging.DEBUG, OutputFormat.text)
     structlog.get_logger().info("hello")
