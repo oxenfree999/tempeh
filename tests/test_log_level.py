@@ -1,5 +1,6 @@
 """Tests for log-level resolution and structlog configuration."""
 
+import json
 import logging
 
 import pytest
@@ -55,3 +56,13 @@ def test_level_filtering():
         structlog.get_logger().warning("should appear")
     assert len(logs) == 1
     assert logs[0]["event"] == "should appear"
+
+
+def test_json_output_end_to_end(capsys):
+    configure_logging(logging.DEBUG, OutputFormat.json)
+    structlog.get_logger().info("hello")
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    parsed = json.loads(captured.err)
+    assert parsed["event"] == "hello"
+    assert parsed["level"] == "info"
