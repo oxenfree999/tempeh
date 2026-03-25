@@ -12,8 +12,8 @@ lint:
 
 # Auto-fix lint issues and format code
 fix:
-    uv run ruff check --fix .
     uv run ruff format .
+    uv run ruff check --fix .
 
 # Format code
 fmt:
