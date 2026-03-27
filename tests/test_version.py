@@ -1,6 +1,6 @@
 import re
 
-from tempeh.version import VERSION
+from psoul.version import VERSION
 
 
 def test_version_is_set() -> None:

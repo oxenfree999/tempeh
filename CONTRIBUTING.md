@@ -1,6 +1,6 @@
-# Contributing to Tempeh
+# Contributing to psoul
 
-Thanks for your interest in contributing! Tempeh is in early development
+Thanks for your interest in contributing! psoul is in early development
 (v0.0.x) and is founder-directed while the architecture settles. Bug
 reports and small fixes are welcome; please open an issue before starting
 work on larger changes so we can discuss the approach.
@@ -12,8 +12,8 @@ work on larger changes so we can discuss the approach.
 2. Clone the repo and install dependencies:
 
    ```bash
-   git clone https://github.com/oxenfree999/tempeh.git
-   cd tempeh
+   git clone https://github.com/oxenfree999/psoul.git
+   cd psoul
    uv sync --group dev --group test
    ```
 

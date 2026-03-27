@@ -6,8 +6,8 @@ import logging
 import pytest
 import structlog
 
-from tempeh.cli.logging import configure_logging, resolve_log_level
-from tempeh.cli.state import OutputFormat
+from psoul.cli.logging import configure_logging, resolve_log_level
+from psoul.cli.state import OutputFormat
 
 
 @pytest.mark.parametrize(
@@ -18,14 +18,14 @@ from tempeh.cli.state import OutputFormat
         (2, False, {}, logging.DEBUG),
         (3, False, {}, logging.DEBUG),
         (0, True, {}, logging.ERROR),
-        (0, False, {"TEMPEH_LOG": "debug"}, logging.DEBUG),
-        (0, False, {"TEMPEH_LOG": "info"}, logging.INFO),
-        (0, False, {"TEMPEH_LOG": "error"}, logging.ERROR),
-        (0, False, {"TEMPEH_LOG": "DEBUG"}, logging.DEBUG),
-        (1, False, {"TEMPEH_LOG": "error"}, logging.INFO),
-        (0, True, {"TEMPEH_LOG": "debug"}, logging.ERROR),
-        (0, False, {"TEMPEH_LOG": "bogus"}, logging.WARNING),
-        (0, False, {"TEMPEH_LOG": ""}, logging.WARNING),
+        (0, False, {"PSOUL_LOG": "debug"}, logging.DEBUG),
+        (0, False, {"PSOUL_LOG": "info"}, logging.INFO),
+        (0, False, {"PSOUL_LOG": "error"}, logging.ERROR),
+        (0, False, {"PSOUL_LOG": "DEBUG"}, logging.DEBUG),
+        (1, False, {"PSOUL_LOG": "error"}, logging.INFO),
+        (0, True, {"PSOUL_LOG": "debug"}, logging.ERROR),
+        (0, False, {"PSOUL_LOG": "bogus"}, logging.WARNING),
+        (0, False, {"PSOUL_LOG": ""}, logging.WARNING),
     ],
 )
 def test_resolve_log_level(

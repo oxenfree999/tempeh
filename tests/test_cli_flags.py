@@ -4,8 +4,8 @@ import pytest
 import typer
 from typer.testing import CliRunner
 
-from tempeh.cli.main import cli
-from tempeh.version import VERSION
+from psoul.cli.main import cli
+from psoul.version import VERSION
 
 runner = CliRunner()
 
@@ -14,7 +14,7 @@ runner = CliRunner()
 def test_version_output(args: list[str]) -> None:
     result = runner.invoke(cli, args)
     assert result.exit_code == 0
-    assert f"tempeh {VERSION}" in result.output
+    assert f"psoul {VERSION}" in result.output
 
 
 def test_verbose_quiet_conflict() -> None:

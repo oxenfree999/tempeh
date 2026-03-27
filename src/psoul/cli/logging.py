@@ -1,4 +1,4 @@
-"""Structlog-based internal diagnostics for Tempeh."""
+"""Structlog-based internal diagnostics for psoul."""
 
 import logging
 import os
@@ -6,7 +6,7 @@ import sys
 
 import structlog
 
-from tempeh.cli.state import OutputFormat
+from psoul.cli.state import OutputFormat
 
 _LEVEL_NAMES: dict[str, int] = {
     "debug": logging.DEBUG,
@@ -23,7 +23,7 @@ _VERBOSE_DEBUG = 2
 def resolve_log_level(verbose: int, quiet: bool) -> int:
     """Return the effective log level.
 
-    Precedence: CLI flags (-v/-q) → TEMPEH_LOG env var → WARNING default.
+    Precedence: CLI flags (-v/-q) → PSOUL_LOG env var → WARNING default.
     """
     if quiet:
         return logging.ERROR
@@ -32,11 +32,11 @@ def resolve_log_level(verbose: int, quiet: bool) -> int:
     if verbose == _VERBOSE_INFO:
         return logging.INFO
 
-    return _LEVEL_NAMES.get(os.environ.get("TEMPEH_LOG", "").strip().lower(), logging.WARNING)
+    return _LEVEL_NAMES.get(os.environ.get("PSOUL_LOG", "").strip().lower(), logging.WARNING)
 
 
 def configure_logging(level: int, output_format: OutputFormat) -> None:
-    """Configure structlog for Tempeh's diagnostic output."""
+    """Configure structlog for psoul's diagnostic output."""
     renderer = (
         structlog.processors.JSONRenderer() if output_format is OutputFormat.json else structlog.dev.ConsoleRenderer()
     )

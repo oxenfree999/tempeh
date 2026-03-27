@@ -13,7 +13,7 @@ import typer
 from inline_snapshot import snapshot
 from typer.testing import CliRunner
 
-from tempeh.cli.main import cli
+from psoul.cli.main import cli
 
 runner = CliRunner()
 
@@ -24,7 +24,7 @@ def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
     assert result.exit_code == 0
     assert typer.unstyle(result.output) == snapshot("""\
                                                                                 \n\
- Usage: tempeh [OPTIONS] COMMAND [ARGS]...                                      \n\
+ Usage: psoul [OPTIONS] COMMAND [ARGS]...                                       \n\
                                                                                 \n\
  A CLI and TUI Python session supervisor with batteries included.               \n\
                                                                                 \n\
@@ -53,8 +53,8 @@ def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
 │                                                    exit.                     │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
-│ doctor   Check Tempeh environment and report status.                         │
-│ version  Show Tempeh version.                                                │
+│ doctor   Check psoul environment and report status.                          │
+│ version  Show psoul version.                                                 │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)
@@ -66,9 +66,9 @@ def test_version_help(monkeypatch: pytest.MonkeyPatch) -> None:
     assert result.exit_code == 0
     assert typer.unstyle(result.output) == snapshot("""\
                                                                                 \n\
- Usage: tempeh version [OPTIONS]                                                \n\
+ Usage: psoul version [OPTIONS]                                                 \n\
                                                                                 \n\
- Show Tempeh version.                                                           \n\
+ Show psoul version.                                                            \n\
                                                                                 \n\
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help  -h        Show this message and exit.                                │
@@ -83,9 +83,9 @@ def test_doctor_help(monkeypatch: pytest.MonkeyPatch) -> None:
     assert result.exit_code == 0
     assert typer.unstyle(result.output) == snapshot("""\
                                                                                 \n\
- Usage: tempeh doctor [OPTIONS]                                                 \n\
+ Usage: psoul doctor [OPTIONS]                                                  \n\
                                                                                 \n\
- Check Tempeh environment and report status.                                    \n\
+ Check psoul environment and report status.                                     \n\
                                                                                 \n\
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │ --help  -h        Show this message and exit.                                │
@@ -97,4 +97,4 @@ def test_doctor_help(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_version_output() -> None:
     result = runner.invoke(cli, ["version"])
     assert result.exit_code == 0
-    assert result.output == snapshot("tempeh 0.0.1\n")
+    assert result.output == snapshot("psoul 0.0.1\n")
