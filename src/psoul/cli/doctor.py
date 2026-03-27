@@ -1,4 +1,4 @@
-"""Environment health checks for tempeh doctor."""
+"""Environment health checks for psoul doctor."""
 
 import platform
 import shutil
@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from tempeh.version import VERSION
+from psoul.version import VERSION
 
 LABEL_WIDTH = 14
 
@@ -67,7 +67,7 @@ def get_system_info() -> dict[str, Any]:
         "venv": _get_venv(),
         "interpreter": sys.executable,
         "python": {"version": platform.python_version()},
-        "tempeh": {"version": VERSION},
+        "psoul": {"version": VERSION},
         "tools": tools,
     }
 
@@ -84,7 +84,7 @@ def format_text(info: dict[str, Any]) -> str:
     lines.append(f"{'Venv':<{LABEL_WIDTH}} {venv or 'not active'}")
     lines.append(f"{'Interpreter':<{LABEL_WIDTH}} {info['interpreter']}")
 
-    lines.append(f"{'Tempeh':<{LABEL_WIDTH}} {info['tempeh']['version']}")
+    lines.append(f"{'psoul':<{LABEL_WIDTH}} {info['psoul']['version']}")
     lines.append(f"{'Python':<{LABEL_WIDTH}} {info['python']['version']}")
 
     lines.append("")

@@ -1,4 +1,4 @@
-"""Tests for tempeh doctor command."""
+"""Tests for psoul doctor command."""
 
 import json
 import shutil
@@ -10,8 +10,8 @@ from typing import Never
 import pytest
 from typer.testing import CliRunner
 
-from tempeh.cli.doctor import PREFERRED_TOOLS, _get_tool_info, _get_venv, format_text, get_system_info
-from tempeh.cli.main import cli
+from psoul.cli.doctor import PREFERRED_TOOLS, _get_tool_info, _get_venv, format_text, get_system_info
+from psoul.cli.main import cli
 
 runner = CliRunner()
 
@@ -71,7 +71,7 @@ def test_get_venv_not_active(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_get_system_info_keys() -> None:
     info = get_system_info()
-    assert set(info.keys()) == {"platform", "directory", "venv", "interpreter", "python", "tempeh", "tools"}
+    assert set(info.keys()) == {"platform", "directory", "venv", "interpreter", "python", "psoul", "tools"}
 
 
 def test_format_text_shows_unavailable_tools() -> None:
@@ -85,7 +85,7 @@ def test_format_text_shows_unavailable_tools() -> None:
 def test_doctor_text_contains_expected_labels() -> None:
     result = runner.invoke(cli, ["doctor"])
     assert result.exit_code == 0
-    for label in ("Platform", "Directory", "Venv", "Interpreter", "Tempeh", "Python", *PREFERRED_TOOLS):
+    for label in ("Platform", "Directory", "Venv", "Interpreter", "psoul", "Python", *PREFERRED_TOOLS):
         assert label in result.output
 
 

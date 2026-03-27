@@ -2,7 +2,7 @@
 
 import pytest
 
-from tempeh.cli.state import ColorMode, resolve_color
+from psoul.cli.state import ColorMode, resolve_color
 
 
 @pytest.mark.parametrize(

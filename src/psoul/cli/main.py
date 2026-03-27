@@ -1,4 +1,4 @@
-"""Tempeh CLI entry point."""
+"""psoul CLI entry point."""
 
 import json
 from pathlib import Path
@@ -6,13 +6,13 @@ from typing import Annotated
 
 import typer
 
-from tempeh.cli.doctor import format_text, get_system_info
-from tempeh.cli.logging import configure_logging, resolve_log_level
-from tempeh.cli.state import ColorMode, ExitCode, GlobalState, OutputFormat, resolve_color
-from tempeh.version import VERSION
+from psoul.cli.doctor import format_text, get_system_info
+from psoul.cli.logging import configure_logging, resolve_log_level
+from psoul.cli.state import ColorMode, ExitCode, GlobalState, OutputFormat, resolve_color
+from psoul.version import VERSION
 
 cli = typer.Typer(
-    name="tempeh",
+    name="psoul",
     help="A CLI and TUI Python session supervisor with batteries included.",
     invoke_without_command=True,
     context_settings={"help_option_names": ["--help", "-h"]},
@@ -21,7 +21,7 @@ cli = typer.Typer(
 
 def _version_callback(value: bool) -> None:
     if value:
-        print(f"tempeh {VERSION}")
+        print(f"psoul {VERSION}")
         raise typer.Exit(ExitCode.SUCCESS)
 
 
@@ -67,7 +67,7 @@ def _main(
 
 @cli.command()
 def doctor(ctx: typer.Context) -> None:
-    """Check Tempeh environment and report status."""
+    """Check psoul environment and report status."""
     info = get_system_info()
     state: GlobalState = ctx.obj
     if state.output_format == OutputFormat.json:
@@ -78,5 +78,5 @@ def doctor(ctx: typer.Context) -> None:
 
 @cli.command()
 def version() -> None:
-    """Show Tempeh version."""
-    print(f"tempeh {VERSION}")
+    """Show psoul version."""
+    print(f"psoul {VERSION}")
