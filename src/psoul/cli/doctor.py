@@ -1,6 +1,7 @@
 """Environment health checks for psoul doctor."""
 
 import platform
+import re
 import shutil
 import subprocess
 import sys
@@ -28,8 +29,6 @@ KNOWN_TOOLS = (
     "ty",
     "mypy",
     "pyright",
-    # debugging
-    "debugpy",
     # profiling
     "austin",
     "py-spy",
@@ -37,7 +36,7 @@ KNOWN_TOOLS = (
     "scalene",
 )
 
-PREFERRED_TOOLS = ("uv", "ruff", "ty", "debugpy")
+PREFERRED_TOOLS = ("uv", "ruff", "ty")
 
 
 def _get_tool_info(name: str) -> dict[str, Any]:
@@ -49,7 +48,8 @@ def _get_tool_info(name: str) -> dict[str, Any]:
         proc = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=3, check=False)  # noqa: S603 — path comes from shutil.which
     except Exception as e:  # noqa: BLE001 — version check should never crash doctor
         return {"available": True, "version": None, "path": path, "error": str(e)}
-    version = proc.stdout.strip().removeprefix(f"{name} ").split()[0] if proc.returncode == 0 else None
+    stdout = proc.stdout.strip()
+    version = m.group(0) if proc.returncode == 0 and (m := re.search(r"\d+\.\d+[\w.]*", stdout)) else None
     return {"available": True, "version": version, "path": path, "error": None}
 
 
