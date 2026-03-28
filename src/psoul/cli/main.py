@@ -1,6 +1,8 @@
 """psoul CLI entry point."""
 
+import dataclasses
 import json
+import sys
 from pathlib import Path
 from typing import Annotated
 
@@ -9,6 +11,7 @@ import typer
 from psoul.cli.doctor import format_text, get_system_info
 from psoul.cli.logging import configure_logging, resolve_log_level
 from psoul.cli.state import ColorMode, ExitCode, GlobalState, OutputFormat, resolve_color
+from psoul.config import PsoulConfig, find_config_file, generate_config, load_config
 from psoul.version import VERSION
 
 cli = typer.Typer(
@@ -48,6 +51,9 @@ def _main(
 
     log_level = resolve_log_level(verbose, quiet)
 
+    config_file = find_config_file(config)
+    psoul_config = load_config(config_file)
+
     ctx.obj = GlobalState(
         verbose=verbose,
         quiet=quiet,
@@ -55,7 +61,8 @@ def _main(
         color_enabled=resolve_color(color),
         output_format=output_format,
         log_level=log_level,
-        config_path=config,
+        config_path=config_file,
+        config=psoul_config,
     )
 
     configure_logging(log_level, output_format)
@@ -74,6 +81,42 @@ def doctor(ctx: typer.Context) -> None:
         print(json.dumps(info, indent=2))
     else:
         print(format_text(info))
+
+
+config_app = typer.Typer(name="config", help="Show and manage configuration.")
+cli.add_typer(config_app, name="config")
+
+
+@config_app.callback(invoke_without_command=True)
+def config_cmd(
+    ctx: typer.Context,
+    default: Annotated[bool, typer.Option("--default", help="Show default configuration.")] = False,
+) -> None:
+    """Show and manage configuration."""
+    if ctx.invoked_subcommand is not None:
+        return
+    state: GlobalState = ctx.obj
+    cfg = PsoulConfig() if default else state.config
+    data = dataclasses.asdict(cfg)
+    if state.output_format == OutputFormat.json:
+        print(json.dumps(data, indent=2, default=str))
+    else:
+        for section, values in data.items():
+            for key, value in values.items():
+                print(f"{section}.{key} = {value!r}")
+
+
+@config_app.command()
+def init(ctx: typer.Context) -> None:
+    """Write a default psoul.toml to the current directory."""
+    dest = Path("psoul.toml")
+    if dest.exists():
+        print(f"Error: {dest} already exists.", file=sys.stderr)
+        raise typer.Exit(ExitCode.ERROR)
+    dest.write_text(generate_config())
+    state: GlobalState = ctx.obj
+    if not state.quiet:
+        print(f"Wrote {dest}")
 
 
 @cli.command()
