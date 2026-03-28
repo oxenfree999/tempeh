@@ -15,6 +15,8 @@ from psoul.config import (
     SessionConfig,
     default_config_dir,
     default_state_dir,
+    find_config_file,
+    load_config,
 )
 
 
@@ -97,3 +99,59 @@ def test_config_is_frozen() -> None:
     config = PsoulConfig()
     with pytest.raises(AttributeError):
         config.paths = PathsConfig(state_dir=Path("/tmp"))  # ty: ignore[invalid-assignment]
+
+
+def test_load_config_none_returns_defaults() -> None:
+    config = load_config(None)
+    assert config == PsoulConfig()
+
+
+def test_load_config_from_toml(tmp_path: Path) -> None:
+    toml_file = tmp_path / "psoul.toml"
+    toml_file.write_text('[launch]\nmode = "headless"\n\n[process]\nstop_timeout = "30s"\n')
+    config = load_config(toml_file)
+    assert config.launch.mode == "headless"
+    assert config.process.stop_timeout == "30s"
+    assert config.paths.state_dir is None  # untouched sections keep defaults
+
+
+def test_load_config_from_pyproject(tmp_path: Path) -> None:
+    pyproject = tmp_path / "pyproject.toml"
+    pyproject.write_text('[tool.psoul.launch]\nmode = "headless"\n')
+    config = load_config(pyproject)
+    assert config.launch.mode == "headless"
+    assert config.process.stop_signal == "SIGTERM"  # defaults preserved
+
+
+def test_find_config_file_override_missing(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError):
+        find_config_file(tmp_path / "nonexistent.toml")
+
+
+def test_find_config_file_override_exists(tmp_path: Path) -> None:
+    config_file = tmp_path / "custom.toml"
+    config_file.write_text("")
+    assert find_config_file(config_file) == config_file
+
+
+def test_find_config_file_discovery_precedence(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    # No config files — returns None
+    assert find_config_file() is None
+
+    # pyproject.toml without [tool.psoul] — ignored
+    (tmp_path / "pyproject.toml").write_text("[project]\nname = 'foo'\n")
+    assert find_config_file() is None
+
+    # Add [tool.psoul] — now pyproject.toml is discovered
+    (tmp_path / "pyproject.toml").write_text("[tool.psoul.launch]\nmode = 'headless'\n")
+    result = find_config_file()
+    assert result is not None
+    assert result.name == "pyproject.toml"
+
+    # Add psoul.toml — wins over pyproject.toml
+    (tmp_path / "psoul.toml").write_text('[launch]\nmode = "attached"\n')
+    result = find_config_file()
+    assert result is not None
+    assert result.name == "psoul.toml"

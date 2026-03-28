@@ -1,5 +1,6 @@
 """Configuration schema and platform directory resolution."""
 
+import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -122,3 +123,70 @@ class PsoulConfig:
     session: SessionConfig = SessionConfig()
     output: OutputConfig = OutputConfig()
     retention: RetentionConfig = RetentionConfig()
+
+
+def find_config_file(override: Path | None = None) -> Path | None:
+    """Discover the config file to use, following precedence order.
+
+    override (Path | None): explicit --config flag. Raises FileNotFoundError if set but missing.
+
+    Returns the first existing config file, or None if no config found.
+    """
+    if override is not None:
+        if not override.is_file():
+            msg = f"Config file not found: {override}"
+            raise FileNotFoundError(msg)
+        return override
+
+    # Project-local: psoul.toml wins over pyproject.toml
+    psoul_toml = Path("psoul.toml")
+    if psoul_toml.is_file():
+        return psoul_toml
+
+    pyproject = Path("pyproject.toml")
+    if pyproject.is_file():
+        with pyproject.open("rb") as f:
+            data = tomllib.load(f)
+        if "psoul" in data.get("tool", {}):
+            return pyproject
+
+    # User-level config
+    user_config = default_config_dir() / "config.toml"
+    if user_config.is_file():
+        return user_config
+
+    return None
+
+
+def _extract_psoul_table(path: Path, data: dict) -> dict:
+    """Extract the psoul config table from raw TOML data.
+
+    For pyproject.toml, reads from [tool.psoul]. For other files, returns data as-is.
+    """
+    if path.name == "pyproject.toml":
+        return data.get("tool", {}).get("psoul", {})
+    return data
+
+
+def load_config(path: Path | None = None) -> PsoulConfig:
+    """Load configuration from a TOML file into a PsoulConfig.
+
+    path (Path | None): file path from find_config_file(). None means all defaults.
+    """
+    if path is None:
+        return PsoulConfig()
+
+    with path.open("rb") as f:
+        data = tomllib.load(f)
+
+    raw = _extract_psoul_table(path, data)
+
+    return PsoulConfig(
+        paths=PathsConfig(**raw.get("paths", {})),
+        python=PythonConfig(**raw.get("python", {})),
+        launch=LaunchConfig(**raw.get("launch", {})),
+        process=ProcessConfig(**raw.get("process", {})),
+        session=SessionConfig(**raw.get("session", {})),
+        output=OutputConfig(**raw.get("output", {})),
+        retention=RetentionConfig(**raw.get("retention", {})),
+    )
