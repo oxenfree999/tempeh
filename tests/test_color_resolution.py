@@ -17,6 +17,12 @@ from psoul.cli.state import ColorMode, resolve_color
         (ColorMode.auto, True, {"NO_COLOR": ""}, True),
         (ColorMode.auto, True, {"TERM": "dumb"}, False),
         (ColorMode.auto, True, {"TERM": "DUMB"}, False),
+        # FORCE_COLOR enables color even without a TTY
+        (ColorMode.auto, False, {"FORCE_COLOR": "1"}, True),
+        # NO_COLOR takes precedence over FORCE_COLOR (matches structlog)
+        (ColorMode.auto, True, {"NO_COLOR": "1", "FORCE_COLOR": "1"}, False),
+        # empty FORCE_COLOR falls through to TTY check
+        (ColorMode.auto, False, {"FORCE_COLOR": ""}, False),
     ],
 )
 def test_resolve_color(
