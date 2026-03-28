@@ -9,17 +9,11 @@ work on larger changes so we can discuss the approach.
 
 1. Install [uv](https://docs.astral.sh/uv/) and
    [just](https://just.systems/).
-2. Clone the repo and install dependencies:
+2. Clone the repo and run the checks:
 
    ```bash
    git clone https://github.com/oxenfree999/psoul.git
    cd psoul
-   uv sync --group dev --group test
-   ```
-
-3. Run the fixes and tests:
-
-   ```bash
    just
    ```
 
@@ -28,14 +22,13 @@ work on larger changes so we can discuss the approach.
 The [justfile](justfile) has the common commands. `just` is optional —
 the underlying `uv run` commands work fine on their own.
 
-| Command      | What it does                          |
-|--------------|---------------------------------------|
-| `just`       | Auto-fix lint + run tests             |
-| `just test`  | Run the test suite                    |
-| `just lint`  | Check lint and formatting (CI-style)  |
-| `just fix`   | Auto-fix lint issues and format code  |
-| `just snap`  | Update inline snapshot tests          |
-| `just check` | Lint + test without modifying files   |
+| Command       | What it does                           |
+|---------------|----------------------------------------|
+| `just`        | Format, lint, type-check, and test     |
+| `just format` | Auto-fix formatting and lint issues    |
+| `just lint`   | Lint, format check, and type-check     |
+| `just test`   | Run the test suite                     |
+| `just snap`   | Update inline snapshot tests           |
 
 ## Pull requests
 

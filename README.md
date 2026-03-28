@@ -32,13 +32,11 @@ psoul uses [uv](https://docs.astral.sh/uv/) for package management.
 optional — the underlying `uv run` commands work fine on their own.
 
 ```bash
-uv sync --group dev --group test
-just          # run lint fixes + tests
+just          # format, lint, type-check, and test
+just format   # auto-fix formatting and lint issues
+just lint     # lint, format check, and type-check
 just test     # run tests only
-just lint     # check lint + formatting (CI-style)
-just fix      # auto-fix lint + format
 just snap     # update inline snapshots
-just check    # lint + test without modifying files
 ```
 
 CI runs on Ubuntu, macOS, and Windows across Python 3.12, 3.13, and 3.14.

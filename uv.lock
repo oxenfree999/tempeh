@@ -125,13 +125,18 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "inline-snapshot" },
+    { name = "pytest" },
+    { name = "ruff" },
+    { name = "ty" },
+]
+lint = [
     { name = "ruff" },
     { name = "ty" },
 ]
 test = [
     { name = "inline-snapshot" },
     { name = "pytest" },
-    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -142,13 +147,18 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "inline-snapshot", specifier = ">=0.32" },
+    { name = "pytest", specifier = ">=9.0" },
+    { name = "ruff", specifier = ">=0.8" },
+    { name = "ty", specifier = ">=0.0" },
+]
+lint = [
     { name = "ruff", specifier = ">=0.8" },
     { name = "ty", specifier = ">=0.0" },
 ]
 test = [
-    { name = "inline-snapshot", specifier = ">=0.24" },
+    { name = "inline-snapshot", specifier = ">=0.32" },
     { name = "pytest", specifier = ">=9.0" },
-    { name = "ruff", specifier = ">=0.8" },
 ]
 
 [[package]]

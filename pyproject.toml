@@ -87,14 +87,17 @@ Issues = "https://github.com/oxenfree999/psoul/issues"
 psoul = "psoul.cli.main:cli"
 
 [dependency-groups]
-dev = [
+test = [
+    "pytest>=9.0",
+    "inline-snapshot>=0.32",
+]
+lint = [
     "ruff>=0.8",
     "ty>=0.0",
 ]
-test = [
-    "pytest>=9.0",
-    "inline-snapshot>=0.24",
-    "ruff>=0.8",
+dev = [
+    {include-group = "test"},
+    {include-group = "lint"},
 ]
 
 [tool.pytest.ini_options]
