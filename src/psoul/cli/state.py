@@ -36,7 +36,11 @@ def resolve_color(mode: ColorMode) -> bool:
         return True
     if mode is ColorMode.never:
         return False
-    return sys.stdout.isatty() and os.environ.get("NO_COLOR", "") == "" and os.environ.get("TERM", "").lower() != "dumb"
+    if os.environ.get("NO_COLOR", "") != "":
+        return False
+    if os.environ.get("FORCE_COLOR", "") != "":
+        return True
+    return sys.stdout.isatty() and os.environ.get("TERM", "").lower() != "dumb"
 
 
 @dataclass(frozen=True, slots=True)

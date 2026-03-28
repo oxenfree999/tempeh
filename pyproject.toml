@@ -9,23 +9,95 @@ description = "A CLI and TUI Python session supervisor with batteries included."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
+keywords = [
+    "agent",
+    "agentic",
+    "automation",
+    "cli",
+    "console",
+    "cpu",
+    "debug",
+    "debugger",
+    "debugging",
+    "diagnostics",
+    "disk",
+    "env",
+    "environment",
+    "gpu",
+    "inspect",
+    "introspection",
+    "lifecycle",
+    "memory",
+    "monitor",
+    "monitoring",
+    "observability",
+    "process",
+    "profile",
+    "profiler",
+    "profiling",
+    "pty",
+    "python",
+    "ram",
+    "repl",
+    "resources",
+    "session",
+    "shell",
+    "subprocess",
+    "supervisor",
+    "telemetry",
+    "terminal",
+    "tui",
+]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Debuggers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Shells",
+    "Topic :: Terminals",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
 dependencies = [
     "typer>=0.12",
     "structlog>=24.1",
 ]
 
+[project.urls]
+Homepage = "https://github.com/oxenfree999/psoul"
+Repository = "https://github.com/oxenfree999/psoul"
+Issues = "https://github.com/oxenfree999/psoul/issues"
+
 [project.scripts]
 psoul = "psoul.cli.main:cli"
 
 [dependency-groups]
-dev = [
+test = [
+    "pytest>=9.0",
+    "inline-snapshot>=0.32",
+]
+lint = [
     "ruff>=0.8",
     "ty>=0.0",
 ]
-test = [
-    "pytest>=9.0",
-    "inline-snapshot>=0.24",
-    "ruff>=0.8",
+dev = [
+    {include-group = "test"},
+    {include-group = "lint"},
 ]
 
 [tool.pytest.ini_options]

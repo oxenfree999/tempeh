@@ -3,12 +3,11 @@
 These tests lock the exact text of every help screen and the version
 string.  When the CLI surface changes intentionally, run:
 
-    uv run pytest tests/test_cli_snapshots.py --inline-snapshot=update
+    just snap
 
 to accept the new output.
 """
 
-import pytest
 import typer
 from inline_snapshot import snapshot
 from typer.testing import CliRunner
@@ -18,8 +17,7 @@ from psoul.cli.main import cli
 runner = CliRunner()
 
 
-def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("COLUMNS", "80")
+def test_main_help() -> None:
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0
     assert typer.unstyle(result.output) == snapshot("""\
@@ -60,8 +58,7 @@ def test_main_help(monkeypatch: pytest.MonkeyPatch) -> None:
 """)
 
 
-def test_version_help(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("COLUMNS", "80")
+def test_version_help() -> None:
     result = runner.invoke(cli, ["version", "--help"])
     assert result.exit_code == 0
     assert typer.unstyle(result.output) == snapshot("""\
@@ -77,8 +74,7 @@ def test_version_help(monkeypatch: pytest.MonkeyPatch) -> None:
 """)
 
 
-def test_doctor_help(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("COLUMNS", "80")
+def test_doctor_help() -> None:
     result = runner.invoke(cli, ["doctor", "--help"])
     assert result.exit_code == 0
     assert typer.unstyle(result.output) == snapshot("""\
@@ -94,7 +90,7 @@ def test_doctor_help(monkeypatch: pytest.MonkeyPatch) -> None:
 """)
 
 
-def test_version_output() -> None:
+def test_version_output_snapshot() -> None:
     result = runner.invoke(cli, ["version"])
     assert result.exit_code == 0
     assert result.output == snapshot("psoul 0.0.1\n")

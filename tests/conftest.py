@@ -7,6 +7,9 @@ import structlog
 @pytest.fixture(autouse=True)
 def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.delenv("FORCE_COLOR", raising=False)
+    monkeypatch.delenv("CLICOLOR", raising=False)
+    monkeypatch.delenv("CLICOLOR_FORCE", raising=False)
     monkeypatch.delenv("TERM", raising=False)
     monkeypatch.delenv("PSOUL_LOG", raising=False)
     monkeypatch.setenv("COLUMNS", "80")
