@@ -1,9 +1,12 @@
-"""Tests for configuration schema and platform directory resolution."""
+"""Tests for configuration schema, discovery, loading, and CLI commands."""
 
+import json
 from pathlib import Path
 
 import pytest
+from typer.testing import CliRunner
 
+from psoul.cli.main import cli
 from psoul.config import (
     LaunchConfig,
     OutputConfig,
@@ -155,3 +158,21 @@ def test_find_config_file_discovery_precedence(tmp_path: Path, monkeypatch: pyte
     result = find_config_file()
     assert result is not None
     assert result.name == "psoul.toml"
+
+
+runner = CliRunner()
+
+
+def test_config_command_text() -> None:
+    result = runner.invoke(cli, ["config"])
+    assert result.exit_code == 0
+    assert "launch.mode = 'attached'" in result.output
+    assert "process.stop_timeout = '10s'" in result.output
+
+
+def test_config_command_json() -> None:
+    result = runner.invoke(cli, ["--json", "config"])
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert data["launch"]["mode"] == "attached"
+    assert data["process"]["stop_timeout"] == "10s"
