@@ -1,7 +1,8 @@
-"""Configuration schema and platform directory resolution."""
+"""Configuration schema, platform directory resolution, and config generation."""
 
+import dataclasses
 import tomllib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from platformdirs import user_config_path, user_state_path
@@ -26,7 +27,7 @@ class PathsConfig:
     state_dir (Path | None): overrides the default platform state directory. Default: None.
     """
 
-    state_dir: Path | None = None
+    state_dir: Path | None = field(default=None, metadata={"description": "override session/state directory"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,7 +37,9 @@ class PythonConfig:
     python_path (Path | None): overrides uv/PATH discovery with an explicit binary. Default: None.
     """
 
-    python_path: Path | None = None
+    python_path: Path | None = field(
+        default=None, metadata={"description": "override Python binary, bypasses uv discovery"}
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,7 +49,7 @@ class LaunchConfig:
     mode (str): 'attached' or 'headless'. Default: 'attached'.
     """
 
-    mode: str = "attached"
+    mode: str = field(default="attached", metadata={"description": "attached (default) or headless"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -57,8 +60,8 @@ class ProcessConfig:
     stop_signal (str): signal sent by stop — 'SIGTERM', 'SIGINT', etc. Default: 'SIGTERM'.
     """
 
-    stop_timeout: str = "10s"
-    stop_signal: str = "SIGTERM"
+    stop_timeout: str = field(default="10s", metadata={"description": "how long stop waits before suggesting kill"})
+    stop_signal: str = field(default="SIGTERM", metadata={"description": "signal sent by stop (SIGTERM, SIGINT, etc.)"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -70,9 +73,11 @@ class SessionConfig:
     id_format (str): 'short' (human-readable) or 'uuid'. Default: 'short'.
     """
 
-    name_prefix: str = "psoul"
-    tags: dict[str, str] | None = None
-    id_format: str = "short"
+    name_prefix: str = field(default="psoul", metadata={"description": "default name prefix for unnamed sessions"})
+    tags: dict[str, str] | None = field(
+        default=None, metadata={"description": "default key-value tags applied to all sessions"}
+    )
+    id_format: str = field(default="short", metadata={"description": "short (human-readable) or uuid"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,9 +89,9 @@ class OutputConfig:
     timestamps (bool): show timestamps in human-readable output. Default: True.
     """
 
-    format: str = "text"
-    color: str = "auto"
-    timestamps: bool = True
+    format: str = field(default="text", metadata={"description": "text (default), json, or ndjson"})
+    color: str = field(default="auto", metadata={"description": "auto, always, or never"})
+    timestamps: bool = field(default=True, metadata={"description": "show timestamps in human-readable output"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,9 +103,9 @@ class RetentionConfig:
     max_artifact_mb (int): per-session artifact cap in MB. Default: 500.
     """
 
-    max_age: str = "7d"
-    max_sessions: int = 100
-    max_artifact_mb: int = 500
+    max_age: str = field(default="7d", metadata={"description": "auto-prune sessions older than this"})
+    max_sessions: int = field(default=100, metadata={"description": "max completed sessions to keep"})
+    max_artifact_mb: int = field(default=500, metadata={"description": "per-session artifact cap in MB"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -190,3 +195,38 @@ def load_config(path: Path | None = None) -> PsoulConfig:
         output=OutputConfig(**raw.get("output", {})),
         retention=RetentionConfig(**raw.get("retention", {})),
     )
+
+
+def _format_toml_value(value: object) -> str:
+    """Format a Python value as a TOML literal."""
+    if value is None:
+        return '""'
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, str):
+        return f'"{value}"'
+    return str(value)
+
+
+def generate_config() -> str:
+    """Generate a commented psoul.toml by introspecting PsoulConfig fields.
+
+    Every value is commented out so the file uses all defaults.
+    Descriptions come from field metadata, not a separate data structure.
+    """
+    defaults = PsoulConfig()
+    lines = ["# psoul configuration", ""]
+
+    for section_field in dataclasses.fields(defaults):
+        section = getattr(defaults, section_field.name)
+        lines.append(f"[{section_field.name}]")
+        for f in dataclasses.fields(section):
+            desc = f.metadata.get("description", "")
+            value = getattr(section, f.name)
+            comment = f"  # {desc}" if desc else ""
+            lines.append(f"# {f.name} = {_format_toml_value(value)}{comment}")
+        lines.append("")
+
+    return "\n".join(lines)

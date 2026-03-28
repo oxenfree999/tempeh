@@ -2,6 +2,7 @@
 
 import dataclasses
 import json
+import sys
 from pathlib import Path
 from typing import Annotated
 
@@ -10,7 +11,7 @@ import typer
 from psoul.cli.doctor import format_text, get_system_info
 from psoul.cli.logging import configure_logging, resolve_log_level
 from psoul.cli.state import ColorMode, ExitCode, GlobalState, OutputFormat, resolve_color
-from psoul.config import find_config_file, load_config
+from psoul.config import PsoulConfig, find_config_file, generate_config, load_config
 from psoul.version import VERSION
 
 cli = typer.Typer(
@@ -82,17 +83,40 @@ def doctor(ctx: typer.Context) -> None:
         print(format_text(info))
 
 
-@cli.command(name="config")
-def config_cmd(ctx: typer.Context) -> None:
-    """Show resolved configuration."""
+config_app = typer.Typer(name="config", help="Show and manage configuration.")
+cli.add_typer(config_app, name="config")
+
+
+@config_app.callback(invoke_without_command=True)
+def config_cmd(
+    ctx: typer.Context,
+    default: Annotated[bool, typer.Option("--default", help="Show default configuration.")] = False,
+) -> None:
+    """Show and manage configuration."""
+    if ctx.invoked_subcommand is not None:
+        return
     state: GlobalState = ctx.obj
-    data = dataclasses.asdict(state.config)
+    cfg = PsoulConfig() if default else state.config
+    data = dataclasses.asdict(cfg)
     if state.output_format == OutputFormat.json:
         print(json.dumps(data, indent=2, default=str))
     else:
         for section, values in data.items():
             for key, value in values.items():
                 print(f"{section}.{key} = {value!r}")
+
+
+@config_app.command()
+def init(ctx: typer.Context) -> None:
+    """Write a default psoul.toml to the current directory."""
+    dest = Path("psoul.toml")
+    if dest.exists():
+        print(f"Error: {dest} already exists.", file=sys.stderr)
+        raise typer.Exit(ExitCode.ERROR)
+    dest.write_text(generate_config())
+    state: GlobalState = ctx.obj
+    if not state.quiet:
+        print(f"Wrote {dest}")
 
 
 @cli.command()

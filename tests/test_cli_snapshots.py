@@ -52,8 +52,8 @@ def test_main_help() -> None:
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ╭─ Commands ───────────────────────────────────────────────────────────────────╮
 │ doctor   Check psoul environment and report status.                          │
-│ config   Show resolved configuration.                                        │
 │ version  Show psoul version.                                                 │
+│ config   Show and manage configuration.                                      │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 """)

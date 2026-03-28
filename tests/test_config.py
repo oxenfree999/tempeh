@@ -176,3 +176,46 @@ def test_config_command_json() -> None:
     data = json.loads(result.output)
     assert data["launch"]["mode"] == "attached"
     assert data["process"]["stop_timeout"] == "10s"
+
+
+def test_config_default_text() -> None:
+    result = runner.invoke(cli, ["config", "--default"])
+    assert result.exit_code == 0
+    assert "launch.mode = 'attached'" in result.output
+    assert "process.stop_timeout = '10s'" in result.output
+
+
+def test_config_default_json() -> None:
+    result = runner.invoke(cli, ["--json", "config", "--default"])
+    assert result.exit_code == 0
+    data = json.loads(result.output)
+    assert data["launch"]["mode"] == "attached"
+    assert data["retention"]["max_sessions"] == 100
+
+
+def test_config_default_ignores_config_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text('[launch]\nmode = "headless"\n')
+    # Without --default: picks up the local psoul.toml
+    result = runner.invoke(cli, ["config"])
+    assert "launch.mode = 'headless'" in result.output
+    # With --default: always shows defaults regardless of config file
+    result = runner.invoke(cli, ["config", "--default"])
+    assert "launch.mode = 'attached'" in result.output
+
+
+def test_config_init_creates_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["config", "init"])
+    assert result.exit_code == 0
+    assert "Wrote psoul.toml" in result.output
+    content = (tmp_path / "psoul.toml").read_text()
+    assert "[launch]" in content
+    assert "# mode" in content
+
+
+def test_config_init_refuses_overwrite(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text("")
+    result = runner.invoke(cli, ["config", "init"])
+    assert result.exit_code == 1
