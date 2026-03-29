@@ -6,8 +6,6 @@ from dataclasses import dataclass
 from enum import IntEnum, StrEnum
 from pathlib import Path
 
-from psoul.config import PsoulConfig
-
 
 class ExitCode(IntEnum):
     """Process exit codes."""
@@ -55,5 +53,4 @@ class GlobalState:
     color_enabled: bool
     output_format: OutputFormat
     log_level: int
-    config_path: Path | None
-    config: PsoulConfig
+    config_override: Path | None

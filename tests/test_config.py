@@ -219,3 +219,46 @@ def test_config_init_refuses_overwrite(tmp_path: Path, monkeypatch: pytest.Monke
     (tmp_path / "psoul.toml").write_text("")
     result = runner.invoke(cli, ["config", "init"])
     assert result.exit_code == 1
+
+
+def test_doctor_ignores_broken_local_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text("[launch\nmode = 'headless'\n")
+    result = runner.invoke(cli, ["doctor"])
+    assert result.exit_code == 0
+
+
+def test_config_default_ignores_broken_local_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text("[launch\nmode = 'headless'\n")
+    result = runner.invoke(cli, ["config", "--default"])
+    assert result.exit_code == 0
+    assert "launch.mode = 'attached'" in result.output
+
+
+def test_config_reports_broken_local_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text("[launch\nmode = 'headless'\n")
+    result = runner.invoke(cli, ["config"])
+    assert result.exit_code == 1
+    assert "Config" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_doctor_ignores_missing_config_override() -> None:
+    result = runner.invoke(cli, ["--config", "missing.toml", "doctor"])
+    assert result.exit_code == 0
+
+
+def test_config_reports_missing_config_override() -> None:
+    result = runner.invoke(cli, ["--config", "missing.toml", "config"])
+    assert result.exit_code == 1
+    assert "Config error" in result.output
+    assert "Traceback" not in result.output
+
+
+def test_config_init_ignores_missing_config_override(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    result = runner.invoke(cli, ["--config", "missing.toml", "config", "init"])
+    assert result.exit_code == 0
+    assert "Wrote psoul.toml" in result.output
