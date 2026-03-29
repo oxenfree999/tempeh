@@ -3,6 +3,7 @@
 import dataclasses
 import json
 import sys
+import tomllib
 from pathlib import Path
 from typing import Annotated
 
@@ -20,6 +21,15 @@ cli = typer.Typer(
     invoke_without_command=True,
     context_settings={"help_option_names": ["--help", "-h"]},
 )
+
+
+def _load_resolved_config(config_override: Path | None) -> PsoulConfig:
+    try:
+        config_file = find_config_file(config_override)
+        return load_config(config_file)
+    except (FileNotFoundError, tomllib.TOMLDecodeError, TypeError, ValueError) as exc:
+        print(f"Config error: {exc}", file=sys.stderr)
+        raise typer.Exit(ExitCode.ERROR) from exc
 
 
 def _version_callback(value: bool) -> None:
@@ -51,9 +61,6 @@ def _main(
 
     log_level = resolve_log_level(verbose, quiet)
 
-    config_file = find_config_file(config)
-    psoul_config = load_config(config_file)
-
     ctx.obj = GlobalState(
         verbose=verbose,
         quiet=quiet,
@@ -61,8 +68,7 @@ def _main(
         color_enabled=resolve_color(color),
         output_format=output_format,
         log_level=log_level,
-        config_path=config_file,
-        config=psoul_config,
+        config_override=config,
     )
 
     configure_logging(log_level, output_format)
@@ -96,7 +102,7 @@ def config_cmd(
     if ctx.invoked_subcommand is not None:
         return
     state: GlobalState = ctx.obj
-    cfg = PsoulConfig() if default else state.config
+    cfg = PsoulConfig() if default else _load_resolved_config(state.config_override)
     data = dataclasses.asdict(cfg)
     if state.output_format == OutputFormat.json:
         print(json.dumps(data, indent=2, default=str))
