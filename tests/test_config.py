@@ -314,3 +314,25 @@ def test_config_init_ignores_missing_config_override(tmp_path: Path, monkeypatch
     result = runner.invoke(cli, ["--config", "missing.toml", "config", "init"])
     assert result.exit_code == 0
     assert "Wrote psoul.toml" in result.output
+
+
+@pytest.mark.parametrize("cli_args", [["doctor"], ["version"], ["config", "--default"]])
+def test_safe_commands_survive_invalid_config(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    cli_args: list[str],
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text('[retention]\nmax_sessions = "nope"\n')
+    result = runner.invoke(cli, cli_args)
+    assert result.exit_code == 0
+
+
+def test_config_reports_invalid_type_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "psoul.toml").write_text('[retention]\nmax_sessions = "nope"\n')
+    result = runner.invoke(cli, ["config"])
+    assert result.exit_code == 1
+    assert "Config error" in result.output
+    assert "expected int" in result.output
+    assert "Traceback" not in result.output
