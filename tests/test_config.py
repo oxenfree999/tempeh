@@ -126,6 +126,58 @@ def test_load_config_from_pyproject(tmp_path: Path) -> None:
     assert config.process.stop_signal == "SIGTERM"  # defaults preserved
 
 
+@pytest.mark.parametrize(
+    ("toml_content", "section", "key"),
+    [
+        ('[paths]\nstate_dir = "/tmp/psoul-state"', "paths", "state_dir"),
+        ('[python]\npython_path = "/usr/bin/python3"', "python", "python_path"),
+    ],
+)
+def test_load_config_coerces_string_to_path(
+    tmp_path: Path,
+    toml_content: str,
+    section: str,
+    key: str,
+) -> None:
+    toml_file = tmp_path / "psoul.toml"
+    toml_file.write_text(toml_content)
+    config = load_config(toml_file)
+    assert isinstance(getattr(getattr(config, section), key), Path)
+
+
+@pytest.mark.parametrize(
+    ("toml_content", "match"),
+    [
+        ("[paths]\nstate_dir = 42", r"\[paths\] state_dir: expected path string, got int"),
+        ('[retention]\nmax_sessions = "nope"', r"\[retention\] max_sessions: expected int, got str"),
+        ("[retention]\nmax_sessions = true", r"\[retention\] max_sessions: expected int, got bool"),
+        ("[launch]\nmode = 42", r"\[launch\] mode: expected str, got int"),
+        ("[output]\ntimestamps = 1", r"\[output\] timestamps: expected bool, got int"),
+        ('[output]\ntimestamps = "yes"', r"\[output\] timestamps: expected bool, got str"),
+    ],
+)
+def test_load_config_rejects_invalid_type(tmp_path: Path, toml_content: str, match: str) -> None:
+    toml_file = tmp_path / "psoul.toml"
+    toml_file.write_text(toml_content)
+    with pytest.raises(TypeError, match=match):
+        load_config(toml_file)
+
+
+@pytest.mark.parametrize(
+    ("toml_content", "match"),
+    [
+        ("[launch]\nbogus = 1", r"\[launch\] unknown key: bogus"),
+        ("[launch]\nfoo = 1\nbar = 2", r"\[launch\] unknown key: bar, foo"),
+        ("[bogus]\nfoo = 1", r"unknown section: \[bogus\]"),
+    ],
+)
+def test_load_config_rejects_unknown(tmp_path: Path, toml_content: str, match: str) -> None:
+    toml_file = tmp_path / "psoul.toml"
+    toml_file.write_text(toml_content)
+    with pytest.raises(ValueError, match=match):
+        load_config(toml_file)
+
+
 def test_find_config_file_override_missing(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         find_config_file(tmp_path / "nonexistent.toml")

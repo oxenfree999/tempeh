@@ -2,12 +2,67 @@
 
 import dataclasses
 import tomllib
+import types
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import get_args, get_origin, get_type_hints
 
 from platformdirs import user_config_path, user_state_path
 
 APP_NAME = "psoul"
+
+
+def _unwrap_optional(tp: type) -> tuple[type, bool]:
+    """Unwrap ``X | None`` to ``(X, True)``.  Non-optional types return ``(tp, False)``."""
+    origin = get_origin(tp)
+    if origin is types.UnionType:
+        args = [a for a in get_args(tp) if a is not type(None)]
+        if len(args) == 1:
+            return args[0], True
+    return tp, False
+
+
+def _coerce_field(section: str, key: str, value: object, expected: type) -> object:
+    """Validate a config value's type and coerce string paths to ``Path`` objects."""
+    base, optional = _unwrap_optional(expected)
+
+    if value is None:
+        if optional:
+            return None
+        msg = f"[{section}] {key}: unexpected null value"
+        raise ValueError(msg)
+
+    # Path coercion: TOML has no path type, accept strings
+    if base is Path:
+        if isinstance(value, str):
+            return Path(value)
+        msg = f"[{section}] {key}: expected path string, got {type(value).__name__}"
+        raise TypeError(msg)
+
+    # For dict[K, V], check against dict
+    check_type = dict if get_origin(base) is dict else base
+    # bool is a subclass of int — reject crossover in both directions
+    if check_type is int and isinstance(value, bool):
+        msg = f"[{section}] {key}: expected int, got bool"
+        raise TypeError(msg)
+    if not isinstance(value, check_type):
+        expect = "table" if check_type is dict else check_type.__name__
+        msg = f"[{section}] {key}: expected {expect}, got {type(value).__name__}"
+        raise TypeError(msg)
+
+    return value
+
+
+def _normalize_section(section_name: str, section_cls: type, raw: dict) -> dict:
+    """Validate keys and coerce values for a single config section."""
+    known = {f.name for f in dataclasses.fields(section_cls)}
+    unknown = sorted(set(raw) - known)
+    if unknown:
+        msg = f"[{section_name}] unknown key: {', '.join(unknown)}"
+        raise ValueError(msg)
+
+    hints = get_type_hints(section_cls)
+    return {key: _coerce_field(section_name, key, val, hints[key]) for key, val in raw.items()}
 
 
 def default_config_dir() -> Path:
@@ -173,6 +228,17 @@ def _extract_psoul_table(path: Path, data: dict) -> dict:
     return data
 
 
+_SECTION_CLASSES: dict[str, type] = {
+    "paths": PathsConfig,
+    "python": PythonConfig,
+    "launch": LaunchConfig,
+    "process": ProcessConfig,
+    "session": SessionConfig,
+    "output": OutputConfig,
+    "retention": RetentionConfig,
+}
+
+
 def load_config(path: Path | None = None) -> PsoulConfig:
     """Load configuration from a TOML file into a PsoulConfig.
 
@@ -186,14 +252,13 @@ def load_config(path: Path | None = None) -> PsoulConfig:
 
     raw = _extract_psoul_table(path, data)
 
+    unknown = sorted(set(raw) - set(_SECTION_CLASSES))
+    if unknown:
+        msg = f"unknown section: {', '.join(f'[{s}]' for s in unknown)}"
+        raise ValueError(msg)
+
     return PsoulConfig(
-        paths=PathsConfig(**raw.get("paths", {})),
-        python=PythonConfig(**raw.get("python", {})),
-        launch=LaunchConfig(**raw.get("launch", {})),
-        process=ProcessConfig(**raw.get("process", {})),
-        session=SessionConfig(**raw.get("session", {})),
-        output=OutputConfig(**raw.get("output", {})),
-        retention=RetentionConfig(**raw.get("retention", {})),
+        **{name: cls(**_normalize_section(name, cls, raw.get(name, {}))) for name, cls in _SECTION_CLASSES.items()},
     )
 
 
