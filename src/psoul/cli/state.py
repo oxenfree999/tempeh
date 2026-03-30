@@ -51,6 +51,5 @@ class GlobalState:
     quiet: bool
     color: ColorMode
     color_enabled: bool
-    output_format: OutputFormat
     log_level: int
     config_override: Path | None

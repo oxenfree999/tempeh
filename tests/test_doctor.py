@@ -90,6 +90,6 @@ def test_doctor_text_contains_expected_labels() -> None:
 
 
 def test_doctor_json_is_valid() -> None:
-    result = runner.invoke(cli, ["--json", "doctor"])
+    result = runner.invoke(cli, ["doctor", "--json"])
     assert result.exit_code == 0
     assert isinstance(json.loads(result.output), dict)
