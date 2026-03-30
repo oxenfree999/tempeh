@@ -16,6 +16,6 @@ lint:
 test *args:
     uv run pytest {{ args }}
 
-# Update snapshot tests
+# Accept changed, new, and reformatted snapshot values
 snap:
-    uv run pytest --inline-snapshot=update
+    uv run pytest --inline-snapshot=create,fix,update
