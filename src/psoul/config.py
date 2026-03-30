@@ -9,6 +9,8 @@ from typing import get_args, get_origin, get_type_hints
 
 from platformdirs import user_config_path, user_state_path
 
+from psoul.duration import parse_duration
+
 APP_NAME = "psoul"
 
 
@@ -22,7 +24,7 @@ def _unwrap_optional(tp: type) -> tuple[type, bool]:
     return tp, False
 
 
-def _coerce_field(section: str, key: str, value: object, expected: type) -> object:
+def _coerce_field(section: str, key: str, value: object, expected: type, *, duration: bool = False) -> object:
     """Validate a config value's type and coerce string paths to ``Path`` objects."""
     base, optional = _unwrap_optional(expected)
 
@@ -50,19 +52,29 @@ def _coerce_field(section: str, key: str, value: object, expected: type) -> obje
         msg = f"[{section}] {key}: expected {expect}, got {type(value).__name__}"
         raise TypeError(msg)
 
+    if duration and isinstance(value, str):
+        try:
+            parse_duration(value)
+        except ValueError:
+            msg = f"[{section}] {key}: invalid duration: {value!r}"
+            raise ValueError(msg) from None
+
     return value
 
 
 def _normalize_section(section_name: str, section_cls: type, raw: dict) -> dict:
     """Validate keys and coerce values for a single config section."""
-    known = {f.name for f in dataclasses.fields(section_cls)}
-    unknown = sorted(set(raw) - known)
+    fields = {f.name: f for f in dataclasses.fields(section_cls)}
+    unknown = sorted(set(raw) - set(fields))
     if unknown:
         msg = f"[{section_name}] unknown key: {', '.join(unknown)}"
         raise ValueError(msg)
 
     hints = get_type_hints(section_cls)
-    return {key: _coerce_field(section_name, key, val, hints[key]) for key, val in raw.items()}
+    return {
+        key: _coerce_field(section_name, key, val, hints[key], duration=fields[key].metadata.get("duration", False))
+        for key, val in raw.items()
+    }
 
 
 def default_config_dir() -> Path:
@@ -115,7 +127,9 @@ class ProcessConfig:
     stop_signal (str): signal sent by stop — 'SIGTERM', 'SIGINT', etc. Default: 'SIGTERM'.
     """
 
-    stop_timeout: str = field(default="10s", metadata={"description": "how long stop waits before suggesting kill"})
+    stop_timeout: str = field(
+        default="10s", metadata={"description": "how long stop waits before suggesting kill", "duration": True}
+    )
     stop_signal: str = field(default="SIGTERM", metadata={"description": "signal sent by stop (SIGTERM, SIGINT, etc.)"})
 
 
@@ -158,7 +172,9 @@ class RetentionConfig:
     max_artifact_mb (int): per-session artifact cap in MB. Default: 500.
     """
 
-    max_age: str = field(default="7d", metadata={"description": "auto-prune sessions older than this"})
+    max_age: str = field(
+        default="7d", metadata={"description": "auto-prune sessions older than this", "duration": True}
+    )
     max_sessions: int = field(default=100, metadata={"description": "max completed sessions to keep"})
     max_artifact_mb: int = field(default=500, metadata={"description": "per-session artifact cap in MB"})
 

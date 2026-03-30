@@ -178,6 +178,20 @@ def test_load_config_rejects_unknown(tmp_path: Path, toml_content: str, match: s
         load_config(toml_file)
 
 
+@pytest.mark.parametrize(
+    ("toml_content", "match"),
+    [
+        ('[process]\nstop_timeout = "bogus"', r"\[process\] stop_timeout: invalid duration"),
+        ('[retention]\nmax_age = "nope"', r"\[retention\] max_age: invalid duration"),
+    ],
+)
+def test_load_config_rejects_invalid_duration(tmp_path: Path, toml_content: str, match: str) -> None:
+    toml_file = tmp_path / "psoul.toml"
+    toml_file.write_text(toml_content)
+    with pytest.raises(ValueError, match=match):
+        load_config(toml_file)
+
+
 def test_find_config_file_override_missing(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         find_config_file(tmp_path / "nonexistent.toml")
