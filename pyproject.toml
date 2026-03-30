@@ -90,6 +90,7 @@ psoul = "psoul.cli.main:cli"
 [dependency-groups]
 test = [
     "pytest>=9.0",
+    "pytest-cov>=7.0",
     "inline-snapshot>=0.32",
 ]
 lint = [
@@ -109,6 +110,13 @@ filterwarnings = ["error"]
 
 [tool.inline-snapshot]
 format-command = "ruff format --stdin-filename {filename}"
+
+[tool.coverage.run]
+source = ["psoul"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
 
 [tool.ruff]
 target-version = "py312"
