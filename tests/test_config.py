@@ -223,7 +223,7 @@ def test_config_command_text() -> None:
 
 
 def test_config_command_json() -> None:
-    result = runner.invoke(cli, ["--json", "config"])
+    result = runner.invoke(cli, ["config", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert data["launch"]["mode"] == "attached"
@@ -238,7 +238,7 @@ def test_config_default_text() -> None:
 
 
 def test_config_default_json() -> None:
-    result = runner.invoke(cli, ["--json", "config", "--default"])
+    result = runner.invoke(cli, ["config", "--default", "--json"])
     assert result.exit_code == 0
     data = json.loads(result.output)
     assert data["launch"]["mode"] == "attached"

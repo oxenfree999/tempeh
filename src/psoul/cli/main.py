@@ -44,10 +44,6 @@ def _main(
     verbose: Annotated[int, typer.Option("--verbose", "-v", count=True, help="Increase output detail (-v, -vv).")] = 0,
     quiet: Annotated[bool, typer.Option("--quiet", "-q", help="Suppress non-essential output.")] = False,
     color: Annotated[ColorMode, typer.Option("--color", help="Color mode.", case_sensitive=False)] = ColorMode.auto,
-    output_format: Annotated[
-        OutputFormat, typer.Option("--format", help="Output format.", case_sensitive=False)
-    ] = OutputFormat.text,
-    json_flag: Annotated[bool, typer.Option("--json", help="Shorthand for --format json.")] = False,
     config: Annotated[Path | None, typer.Option("--config", help="Override config file location.")] = None,
     version: Annotated[  # noqa: ARG001 — Typer requires the param; work happens in callback
         bool | None, typer.Option("--version", "-V", callback=_version_callback, is_eager=True, help="Show version.")
@@ -56,9 +52,6 @@ def _main(
     if verbose and quiet:
         raise typer.BadParameter("--verbose and --quiet cannot be used together.")
 
-    if json_flag:
-        output_format = OutputFormat.json
-
     log_level = resolve_log_level(verbose, quiet)
 
     ctx.obj = GlobalState(
@@ -66,12 +59,11 @@ def _main(
         quiet=quiet,
         color=color,
         color_enabled=resolve_color(color),
-        output_format=output_format,
         log_level=log_level,
         config_override=config,
     )
 
-    configure_logging(log_level, output_format)
+    configure_logging(log_level, OutputFormat.text)
 
     if ctx.invoked_subcommand is None:
         print(ctx.get_help())
@@ -79,11 +71,12 @@ def _main(
 
 
 @cli.command()
-def doctor(ctx: typer.Context) -> None:
+def doctor(
+    json_flag: Annotated[bool, typer.Option("--json", help="Output JSON instead of text.")] = False,
+) -> None:
     """Check psoul environment and report status."""
     info = get_system_info()
-    state: GlobalState = ctx.obj
-    if state.output_format == OutputFormat.json:
+    if json_flag:
         print(json.dumps(info, indent=2))
     else:
         print(format_text(info))
@@ -97,6 +90,7 @@ cli.add_typer(config_app, name="config")
 def config_cmd(
     ctx: typer.Context,
     default: Annotated[bool, typer.Option("--default", help="Show default configuration.")] = False,
+    json_flag: Annotated[bool, typer.Option("--json", help="Output JSON instead of text.")] = False,
 ) -> None:
     """Show and manage configuration."""
     if ctx.invoked_subcommand is not None:
@@ -104,7 +98,7 @@ def config_cmd(
     state: GlobalState = ctx.obj
     cfg = PsoulConfig() if default else _load_resolved_config(state.config_override)
     data = dataclasses.asdict(cfg)
-    if state.output_format == OutputFormat.json:
+    if json_flag:
         print(json.dumps(data, indent=2, default=str))
     else:
         for section, values in data.items():

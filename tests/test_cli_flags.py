@@ -29,7 +29,7 @@ def test_color_invalid() -> None:
 
 
 def test_json_shorthand() -> None:
-    result = runner.invoke(cli, ["--json", "version"])
+    result = runner.invoke(cli, ["doctor", "--json"])
     assert result.exit_code == 0
 
 
@@ -37,5 +37,5 @@ def test_help_shows_flags() -> None:
     result = runner.invoke(cli, ["--help"])
     assert result.exit_code == 0
     output = typer.unstyle(result.output)
-    for flag in ["--verbose", "--quiet", "--color", "--format", "--config", "--version"]:
+    for flag in ["--verbose", "--quiet", "--color", "--config", "--version"]:
         assert flag in output
