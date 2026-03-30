@@ -14,7 +14,7 @@ lint:
 
 # Run the test suite
 test *args:
-    uv run pytest {{ args }}
+    uv run pytest --cov --cov-report=term-missing {{ args }}
 
 # Accept changed, new, and reformatted snapshot values
 snap:
