@@ -34,10 +34,6 @@ def test_main_help() -> None:
 │                                                    output.                   │
 │ --color                       [auto|always|never]  Color mode.               │
 │                                                    [default: auto]           │
-│ --format                      [text|json]          Output format.            │
-│                                                    [default: text]           │
-│ --json                                             Shorthand for --format    │
-│                                                    json.                     │
 │ --config                      PATH                 Override config file      │
 │                                                    location.                 │
 │ --version             -V                           Show version.             │
@@ -85,6 +81,7 @@ def test_doctor_help() -> None:
  Check psoul environment and report status.                                     \n\
                                                                                 \n\
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --json            Output JSON instead of text.                               │
 │ --help  -h        Show this message and exit.                                │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
